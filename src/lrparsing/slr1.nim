@@ -18,10 +18,10 @@ type
 proc finished*(self: LR0Item): bool =
   self.rule.right.len <= self.bullet
 
-proc next*(self: LR0Item): Token =
+proc nextToken*(self: LR0Item): Token =
   self.rule.right[self.bullet]
 
-proc inc(self: LR0Item): LR0Item =
+proc next(self: LR0Item): LR0Item =
   (self.rule, self. ruleId, self.bullet + 1)
 
 
@@ -57,20 +57,20 @@ proc growed(itemSet: LR0ItemSet, syntax: Syntax): LR0ItemSet =
   result = newSeq[LR0Item]()
   result.insert(itemSet)
   for item in itemSet:
-    if item.finished() or item.next.isTerminal: continue
+    if item.finished() or item.nextToken.isTerminal: continue
     for ruleId, rule in syntax:
-      if rule.left != item.next: continue
+      if rule.left != item.nextToken: continue
       result.add((rule, ruleId, 0))
   result = result.deduplicate()
   if result != itemSet:
     result = result.growed(syntax)
 
-proc inc(itemSet: LR0ItemSet, token: string): LR0ItemSet =
+proc next(itemSet: LR0ItemSet, token: string): LR0ItemSet =
   result = newSeq[LR0Item]()
   for item in itemSet:
     if item.finished: continue
-    if item.next() == token:
-      result.add(item.inc)
+    if item.nextToken() == token:
+      result.add(item.next)
 
 proc `$`*(self: LR0ItemSet): string =
   var itemStrs = newSeq[string]()
@@ -103,7 +103,7 @@ proc add*(self: var LR0Automaton, itemSet: LR0ItemSet, cur: int = 0) =
   var itemSet = itemSet.growed(self.syntax)
   self.addNode(itemSet)
   for token in self.syntax.tokens:
-    var nextSet = inc(itemSet, token)
+    var nextSet = next(itemSet, token)
     if nextSet.len == 0:
       continue
     if self.contains(nextSet):
