@@ -151,50 +151,7 @@ proc `$`*(self: LR0Automaton, indentSize: int = 2): string =
 # ==============================================================================
 
 import tables
-
-var
-  firstSet = newTable[Token, seq[Token]]()
-  followSet = newTable[Token, seq[Token]]()
-
-proc first(nt: Token, syntax: Syntax): seq[Token] =
-  if firstSet.hasKey(nt):
-    return firstSet[nt]
-  firstSet.add(nt, @[])
-  result = newSeq[Token]()
-  for rule in syntax:
-    if rule.left != nt: continue
-    var token = rule.right[0]
-    if token.isTerminal:
-      result.add(token)
-    else:
-      result.insert(first(token, syntax))
-  result = result.deduplicate()
-  firstSet.add(nt, result)
-
-proc follow(nt: Token, syntax: Syntax): seq[Token] =
-  if followSet.hasKey(nt):
-    return followSet[nt]
-  followSet.add(nt, if nt == "S": @["$"] else: @[])
-  result = newSeq[Token]()
-  for rule in syntax:
-    if rule.right[rule.right.len-1] == nt:
-      result.add(follow(rule.left, syntax))
-  for rule in syntax:
-    if rule.left != nt: continue
-    for i, token in rule.right:
-      if i in {0, rule.right.len-1}: continue
-      if token.isTerminal:
-        result.add(token)
-      else:
-        result.add(first(token, syntax))
-  result = result.deduplicate()
-  followSet[nt].add(result)
-  result = followSet[nt].deduplicate()
-  followSet.add(nt, result)
-
-# ==============================================================================
-
-import parsetable
+import follow, parsetable
 export parsetable
 
 type
