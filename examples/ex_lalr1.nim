@@ -1,4 +1,4 @@
-import lrparsing/lr1
+import lrparsing/lalr1
 import lrparsing/parsing
 
 when isMainModule:
