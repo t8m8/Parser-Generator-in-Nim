@@ -155,9 +155,9 @@ import follow, parsetable
 export parsetable
 
 type
-  LR0Table = ParseTable
+  SLR1Table = ParseTable
 
-proc buildSLR1Table*(automaton: LR0Automaton): LR0Table =
+proc buildSLR1Table*(automaton: LR0Automaton): SLR1Table =
   result = newParseTable()
   for edge in automaton.edges:
     if edge.token.isTerminal:
